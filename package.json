@@ -29,7 +29,7 @@
     "url": "https://lsong.org"
   },
   "bugs": {
-    "url": "https://github.com/song940/node-escpos/issues"
+    "url": "https://github.com/danimarimon/escpos/issues"
   },
   "bundleDependencies": false,
   "contributors": [
@@ -78,7 +78,7 @@
     "node": ">=8.x"
   },
   "gitHead": "d1616e40f18cbeb8e1db332365fc0e167fba1308",
-  "homepage": "https://github.com/song940/node-escpos#readme",
+  "homepage": "https://github.com/danimarimon/escpos",
   "keywords": [
     "escpos",
     "printer"
@@ -93,5 +93,6 @@
   "scripts": {
     "test": "mocha"
   },
-  "version": "3.0.0-alpha.6"
+  "version": "3.0.0-alpha.6",
+  "private": true
 }
