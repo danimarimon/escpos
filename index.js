@@ -709,6 +709,31 @@ Printer.prototype.qrimage = function (content, options, callback) {
  * @param  {[type]} density [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
+
+ //density = mono lato mio
+Printer.prototype.imageBitmap = async function (bitmap, density) {
+  density = density || 'd24';
+  var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
+  var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
+  var bitmap = image.toBitmap(n * 8);
+  var self = this;
+
+  // added a delay so the printer can process the graphical data
+  // when connected via slower connection ( e.g.: Serial)
+  this.lineSpace(0); // set line spacing to 0
+  bitmap.data.forEach(async (line) => {
+    self.buffer.write(header);
+    self.buffer.writeUInt16LE(line.length / n);
+    self.buffer.write(line);
+    self.buffer.write(_.EOL);
+    await new Promise((resolve, reject) => {
+      setTimeout(() => { resolve(true) }, 200);
+    });
+  });
+  return this.lineSpace();
+};
+
+
 Printer.prototype.image = async function (image, density) {
   if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
