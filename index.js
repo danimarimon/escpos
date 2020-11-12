@@ -752,11 +752,10 @@ function getRaster (data, width, height){
     }
   }
 
-  const hNumber = parseInt(height);
   return {
     data: result,
     width: n,
-    height: hNumber
+    height
   };
 }
 
@@ -775,6 +774,7 @@ Printer.prototype.printBase64 = function(base64, width, height, color, mode) {
     data.push(hex);
   }
 
+  //TODO: check
   //mode = mode || 'normal';
   var mode = 'normal';
   if (mode === 'dhdw' ||
@@ -782,17 +782,12 @@ Printer.prototype.printBase64 = function(base64, width, height, color, mode) {
     mode === 'dhw') mode = 'dwdh';
   const raster = getRaster(data, width, height);
   raster.data = data;
-
-  console.log('raster');
-  console.log(raster);
  
   var header = _.GSV0_FORMAT['GSV0_' + mode.toUpperCase()];
   this.buffer.write(header);
   this.buffer.writeUInt16LE(raster.width);
   this.buffer.writeUInt16LE(raster.height);
   this.buffer.write(raster.data);
-  console.log('Printer.prototype.printBase64');
-  console.log(this);
   return this;
 }
 
