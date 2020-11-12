@@ -703,37 +703,105 @@ Printer.prototype.qrimage = function (content, options, callback) {
   return this;
 };
 
+
+/**
+ * 
+ * @param {[type]} buffer [Buffer to read] 
+ * @return {[Array<integer>]} arr [the integer array generated from buffer]
+ */
+function readBuffer(buffer) {
+  const arr = [];
+  for (let x of buffer) {
+    //const hex = x.toString(10);
+    arr.push(x);
+  }
+
+  return arr;
+}
+
+/**
+ * @param  {[type]} data   [description]
+ * @param  {[type]} width [description]
+ * @param  {[type]} height   [description]
+ * @return {[Raster]} raster  [return the raster]
+ */
+function getRaster (data, width, height){
+  // n blocks of lines
+  var result = [];
+  var n = Math.ceil(width / 8);
+  var x, y, b, c, i;
+
+  for (y = 0; y < height; y++) {
+
+    for (x = 0; x < n; x++) {
+
+      for (b = 0; b < 8; b++) {
+        i = x * 8 + b;
+
+        if (result[y * n + x] === undefined) {
+          result[y * n + x] = 0;
+        }
+
+        c = x * 8 + b;
+        if (c < width) {
+          if (data[y * width + i]) {
+            result[y * n + x] += (0x80 >> (b & 0x7));
+          }
+        }
+      }
+    }
+  }
+
+  const hNumber = parseInt(height);
+  return {
+    data: result,
+    width: n,
+    height: hNumber
+  };
+}
+
+/**
+ * @param  {[type]} base64   [description]
+ * @param  {[type]} width [description]
+ * @param  {[type]} height   [description]
+ * @param  {[type]} color [not used now]
+ * @param  {[type]} mode [not used now]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.printBase64 = function(base64, width, height, color, mode) {
+  let buffer = Buffer.from(base64, 'base64');
+  const data = [];
+  for (let hex of readBuffer(buffer)) {
+    data.push(hex);
+  }
+
+  //mode = mode || 'normal';
+  var mode = 'normal';
+  if (mode === 'dhdw' ||
+    mode === 'dwh' ||
+    mode === 'dhw') mode = 'dwdh';
+  const raster = getRaster(data, width, height);
+  raster.data = data;
+
+  console.log('raster');
+  console.log(raster);
+ 
+  var header = _.GSV0_FORMAT['GSV0_' + mode.toUpperCase()];
+  this.buffer.write(header);
+  this.buffer.writeUInt16LE(raster.width);
+  this.buffer.writeUInt16LE(raster.height);
+  this.buffer.write(raster.data);
+  console.log('Printer.prototype.printBase64');
+  console.log(this);
+  return this;
+}
+
 /**
  * [image description]
  * @param  {[type]} image   [description]
  * @param  {[type]} density [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-
- //density = mono lato mio
-Printer.prototype.imageBitmap = async function (bitmap, density) {
-  density = density || 'd24';
-  var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
-  var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
-  var bitmap = image.toBitmap(n * 8);
-  var self = this;
-
-  // added a delay so the printer can process the graphical data
-  // when connected via slower connection ( e.g.: Serial)
-  this.lineSpace(0); // set line spacing to 0
-  bitmap.data.forEach(async (line) => {
-    self.buffer.write(header);
-    self.buffer.writeUInt16LE(line.length / n);
-    self.buffer.write(line);
-    self.buffer.write(_.EOL);
-    await new Promise((resolve, reject) => {
-      setTimeout(() => { resolve(true) }, 200);
-    });
-  });
-  return this.lineSpace();
-};
-
-
 Printer.prototype.image = async function (image, density) {
   if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
