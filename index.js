@@ -107,16 +107,15 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
     Example:
     <area x="0" y="0" width="600" height="200"/>
   */
-  this.buffer.write(_.ESC);
-  this.buffer.write(_.W);
-  this.buffer.writeUInt8(x);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(y);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(width);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(height);
-  this.buffer.writeUInt8(0);
+  this.buffer.write(_.ESC + _.W);
+  this.buffer.writeUInt16LE(x);
+  this.buffer.writeUInt16LE(0);
+  this.buffer.writeUInt16LE(y);
+  this.buffer.writeUInt16LE(0);
+  this.buffer.writeUInt16LE(width);
+  this.buffer.writeUInt16LE(0);
+  this.buffer.writeUInt16LE(height);
+  this.buffer.writeUInt16LE(0);
   return this;
 };
 
@@ -132,8 +131,7 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
     Example:
     <position x="250" y="0"/>
   */
-  this.buffer.write(_.GS);
-  this.buffer.write(_.BACKSLASH);
+  this.buffer.write(_.GS + _.BACKSLASH);
   this.buffer.writeUInt8(x ? x : 0);
   this.buffer.writeUInt8(y ? y : 0);
   return this;
