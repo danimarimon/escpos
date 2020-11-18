@@ -20,9 +20,30 @@ var numToHexString = function (value) {
  * ESC/POS _ (Constants)
  */
 var _ = {
+  L: '\x4c', //Switches from standard mode to page mode
+  S: '\x53', //Switches from page mode to standard mode
+
+  /**
+   * ESC T n -> Select print direction in page mode
+   * 
+   * 0≤ n ≤3,
+   * 48≤ n ≤51
+   * 
+   * Select the print direction and starting position in page mode.
+   * n specifies the print direction and starting position as follows
+   */
+
+  T: '\x54', //Select print direction in page mode
+  W: '\x57', //Select printing area in page mode
+
+  //GS $ Set absolute vertical print position in page mode
+  //GS ＼ Set relative vertical print position in page mode
+  
+  BACKSLASH = '\x92',
+  
   LF: '\x0a',
   FS: '\x1c',
-  FF: '\x0c',
+  FF: '\x0c', //print in page mode and return to standard
   GS: '\x1d',
   DLE: '\x10',
   EOT: '\x04',
