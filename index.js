@@ -17,7 +17,7 @@ const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} 
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-function Printer(adapter, options) {
+function Printer(adapter, options, executeCharacterSetCommand) {
   if (!(this instanceof Printer)) {
     return new Printer(adapter);
   }
@@ -29,11 +29,13 @@ function Printer(adapter, options) {
   this.encoding = options && options.encoding || 'GB18030';
   this.width = options && options.width || 48;
   this._model = null;
-  //Set codetable for printing latin symbols
-  this.buffer.write(
-    _.ESC + _.CODETABLE.SET 
-    + ((options && options.code) ? _.CODETABLE.CODES[options.code] : _.CODETABLE.CODES.LATIN1)
-  );
+  if(executeCharacterSetCommand) {
+    //Set codetable for printing latin symbols
+    this.buffer.write(
+      _.ESC + _.CODETABLE.SET 
+      + ((options && options.code) ? _.CODETABLE.CODES[options.code] : _.CODETABLE.CODES.LATIN1)
+    );
+  }
 };
 
 Printer.create = function (device) {
