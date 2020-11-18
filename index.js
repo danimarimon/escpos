@@ -83,7 +83,7 @@ Printer.prototype.setCharacterCodeTable = function (codeTable) {
   * 
   */
 Printer.prototype.enablePageMode = function () {
-  this.buffer.write(_.L);
+  this.buffer.write(_.ESC + _.L);
   return this;
 };
 
@@ -91,7 +91,7 @@ Printer.prototype.enablePageMode = function () {
  * 
  */
 Printer.prototype.disablePageMode = function () {
-  this.buffer.write(_.S);
+  this.buffer.write(_.ESC + _.S);
   return this;
 };
 
@@ -106,16 +106,18 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
   /*
     Example:
     <area x="0" y="0" width="600" height="200"/>
+    this.buffer.write(_.ESC);
+    this.buffer.write(_.W + String.fromCharCode(x, 0, y, 0, width, 0, height, 0).toString('hex'));
   */
   this.buffer.write(_.W);
-  this.buffer.writeUInt8(x);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(y);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(width);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(height);
-  this.buffer.writeUInt8(0);
+  this.buffer.writeUInt16BE(x);
+  this.buffer.writeUInt16BE(0);
+  this.buffer.writeUInt16BE(y);
+  this.buffer.writeUInt16BE(0);
+  this.buffer.writeUInt16BE(width);
+  this.buffer.writeUInt16BE(0);
+  this.buffer.writeUInt16BE(height);
+  this.buffer.writeUInt16BE(0);
   return this;
 };
 
@@ -130,15 +132,17 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
   /*
     Example:
     <position x="250" y="0"/>
+    this.buffer.write(_.ESC);
+    this.buffer.write(_.BACKSLASH + String.fromCharCode(x, y).toString('hex'));
   */
   this.buffer.write(_.BACKSLASH);
-  this.buffer.writeUInt8(x ? x : 0);
-  this.buffer.writeUInt8(y ? y : 0);
+  this.buffer.writeUInt16BE(x);
+  this.buffer.writeUInt16BE(y);
   return this;
 };
 
 Printer.prototype.printDataInPageMode = function () {
-  this.buffer.write(_.FF);
+  this.buffer.write(_.ESC + _.FF);
   return this;
 }
 

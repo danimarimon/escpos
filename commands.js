@@ -20,8 +20,8 @@ var numToHexString = function (value) {
  * ESC/POS _ (Constants)
  */
 var _ = {
-  L: '\x1b\x4c', //Switches from standard mode to page mode
-  S: '\x1b\x53', //Switches from page mode to standard mode
+  L: '\x4c', //Switches from standard mode to page mode
+  S: '\x53', //Switches from page mode to standard mode
 
   /**
    * ESC T n -> Select print direction in page mode
@@ -39,7 +39,7 @@ var _ = {
   //GS $ Set absolute vertical print position in page mode
   //GS ＼ Set relative vertical print position in page mode
   
-  BACKSLASH: '\x1b\x92',
+  BACKSLASH: '\x1b\x5C',
   
   LF: '\x0a',
   FS: '\x1c',
@@ -330,7 +330,7 @@ _.CODETABLE = {
   SET: '\x74',
   CODES:{
     PC437:'\x00', //PC437
-    PC858:'\x13', //WPC1252
+    PC858:'\x13', //PC858
     LATIN1:'\x10', //WPC1252
     LATIN2:'\x12', //PC852 (Latin2)
   }
