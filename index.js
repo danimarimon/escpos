@@ -83,6 +83,7 @@ Printer.prototype.setCharacterCodeTable = function (codeTable) {
   * 
   */
 Printer.prototype.enablePageMode = function () {
+  this.buffer.write(_.ESC);
   this.buffer.write(_.L);
   return this;
 };
@@ -91,6 +92,7 @@ Printer.prototype.enablePageMode = function () {
  * 
  */
 Printer.prototype.disablePageMode = function () {
+  this.buffer.write(_.ESC);
   this.buffer.write(_.S);
   return this;
 };
@@ -131,7 +133,7 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
     Example:
     <position x="250" y="0"/>
   */
-  this.buffer.write(_.GS + _.BACKSLASH);
+  this.buffer.write(_.ESC + _.BACKSLASH);
   this.buffer.writeUInt8(x ? x : 0);
   this.buffer.writeUInt8(y ? y : 0);
   return this;
