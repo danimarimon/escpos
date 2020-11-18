@@ -43,7 +43,7 @@ var _ = {
   
   LF: '\x0a',
   FS: '\x1c',
-  FF: '\x0c', //print in page mode and return to standard
+  FF: '\x1b\x0c', //print in page mode and return to standard
   GS: '\x1d',
   DLE: '\x10',
   EOT: '\x04',

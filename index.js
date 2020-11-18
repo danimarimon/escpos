@@ -138,7 +138,7 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
 };
 
 Printer.prototype.printDataInPageMode = function () {
-  this.buffer.write(`${_.ESC}${_.FF}`);
+  this.buffer.write(_.FF);
   return this;
 }
 
