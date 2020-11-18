@@ -29,6 +29,11 @@ function Printer(adapter, options) {
   this.encoding = options && options.encoding || 'GB18030';
   this.width = options && options.width || 48;
   this._model = null;
+  //Set codetable for printing latin symbols
+  this.buffer.write(
+    _.ESC + _.CODETABLE.SET 
+    + ((options && options.code) ? _.CODETABLE.CODES[options.code] : _.CODETABLE.CODES.LATIN1)
+  );
 };
 
 Printer.create = function (device) {
@@ -676,6 +681,23 @@ Printer.prototype.qrcode = function (code, version, level, size) {
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
   }
+  return this;
+};
+
+Printer.prototype.qrimageFromBase64 = function (content, options, callback) {
+  var self = this;
+  if (typeof options == 'function') {
+    callback = options;
+    options = null;
+  }
+  options = options || { type: 'png', mode: 'dhdw' };
+  var buffer = qr.imageSync(content, options);
+  var type = ['image', options.type].join('/');
+  getPixels(buffer, type, function (err, pixels) {
+    if (err) return callback && callback(err);
+    self.raster(new Image(pixels), options.mode);
+    callback && callback.call(self, null, self);
+  });
   return this;
 };
 

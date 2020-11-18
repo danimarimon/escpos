@@ -302,6 +302,20 @@ _.GSV0_FORMAT = {
 };
 
 /**
+ * [CODETABLE how to print character]
+ * @type {string}
+ */
+_.CODETABLE = {
+  SET: '\x74',
+  CODES:{
+    PC437:'\x00', //PC437
+    PC858:'\x13', //WPC1252
+    LATIN1:'\x10', //WPC1252
+    LATIN2:'\x12', //PC852 (Latin2)
+  }
+};
+
+/**
  * [BEEP description]
  * @type {string}
  */
