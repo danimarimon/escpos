@@ -76,21 +76,21 @@ Printer.prototype.setCharacterCodeTable = function (codeTable) {
 };
 
 /**
- * TODO: try from here
+ * Page Mode methods
  */
 
- /**
-  * 
-  */
 Printer.prototype.enablePageMode = function () {
   this.buffer.write(_.ESC);
   this.buffer.write(_.L);
   return this;
 };
 
-/**
- * 
- */
+Printer.prototype.pageModePrintDirection = function (value) {
+  this.buffer.write(_.T);
+  this.buffer.writeUInt8(value)
+  return this;
+};
+
 Printer.prototype.disablePageMode = function () {
   this.buffer.write(_.ESC);
   this.buffer.write(_.S);
@@ -104,40 +104,40 @@ Printer.prototype.printDataInPageMode = function () {
 }
 
 Printer.prototype.printDataInPageModeAndExit = function () {
-  this.buffer.write(_.ESC);
   this.buffer.write(_.FF);
-  this.buffer.write(_.S);
   return this;
 }
 
 /**
  * 
- * @param {*} x 
- * @param {*} y 
- * @param {*} width 
- * @param {*} height 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} width 
+ * @param {number} height 
  */
 Printer.prototype.setAreaPageMode = function (x, y, width, height) {
   /*
     Example:
     <area x="0" y="0" width="600" height="200"/>
   */
+
+  //ESC W xL xH yL yH dxL dxH dyL dyH
   this.buffer.write(_.W);
-  this.buffer.writeUInt16BE(x);
-  this.buffer.writeUInt16BE(0);
-  this.buffer.writeUInt16BE(y);
-  this.buffer.writeUInt16BE(0);
-  this.buffer.writeUInt16BE(width);
-  this.buffer.writeUInt16BE(0);
-  this.buffer.writeUInt16BE(height);
-  this.buffer.writeUInt16BE(0);
+  this.buffer.writeUInt8(x);
+  this.buffer.writeUInt8(0);
+  this.buffer.writeUInt8(y);
+  this.buffer.writeUInt8(0);
+  this.buffer.writeUInt8(width >= 255 ? 255 : width);
+  this.buffer.writeUInt8(0);
+  this.buffer.writeUInt8(height >= 255 ? 255 : height);
+  this.buffer.writeUInt8(0);
   return this;
 };
 
 /**
  * 
- * @param {*} x 
- * @param {*} y 
+ * @param {number} x 
+ * @param {number} y
  * 
  * Relative position
  */
@@ -153,7 +153,7 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
 };
 
 /**
- * TODO: try to here
+ * Page Mode methods finished
  */
 
 /**
