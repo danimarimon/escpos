@@ -146,9 +146,13 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
     Example:
     <position x="250" y="0"/>
   */
+
   this.buffer.write(_.BACKSLASH);
-  this.buffer.writeUInt16BE(x);
-  this.buffer.writeUInt16BE(y);
+  this.buffer.writeUInt8(x >= 255 ? 255 : x);
+  this.buffer.write(_.ESC);
+  this.buffer.write(_.GS);
+  this.buffer.write(_.$);
+  this.buffer.writeUInt16BE(y >= 255 ? 255 : y);
   return this;
 };
 

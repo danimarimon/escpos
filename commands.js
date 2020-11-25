@@ -23,6 +23,7 @@ var _ = {
   L: '\x4c', //Switches from standard mode to page mode
   S: '\x53', //Switches from page mode to standard mode
 
+  $ = '\x24',
   /**
    * ESC T n -> Select print direction in page mode
    * 
