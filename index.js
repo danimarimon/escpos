@@ -149,7 +149,7 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
  * 
  * Relative position
  */
-Printer.prototype.setPositionAreaMode = function (x, y) {
+Printer.prototype.setPositionAreaMode = function (x, y = 0) {
   /*
     Example:
     <position x="250" y="0"/>
