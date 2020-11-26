@@ -115,6 +115,20 @@ Printer.prototype.printDataInPageModeAndExit = function () {
   return this;
 }
 
+Printer.prototype.setAbsolutePrintPosition = function (x, y) {
+  //ESC $ -> X absolute
+  //GS \ -> Y relative
+  const xBuf = Buffer.from([x & 255, (x >> 8) & 255]);
+  const yBuf = Buffer.from([y & 255, (y >> 8) & 255]);
+
+  this.buffer.write(_.GS);
+  this.buffer.write(_.$);
+  this.buffer.write(xBuf);
+  this.buffer.write(_.GS);
+  this.buffer.write(_.$);
+  this.buffer.write(yBuf);
+}
+
 /**
  * 
  * @param {number} x 
