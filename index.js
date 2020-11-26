@@ -85,9 +85,16 @@ Printer.prototype.enablePageMode = function () {
   return this;
 };
 
+//TODO: finish method
 Printer.prototype.pageModePrintDirection = function (value) {
+  let dirInt = value;
+  if(value && (typeof value) === 'string') {
+    /**
+     * switch di valori
+     */
+  }
   this.buffer.write(_.T);
-  this.buffer.writeUInt8(value)
+  this.buffer.writeUInt8(0);
   return this;
 };
 
@@ -120,7 +127,6 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
     Example:
     <area x="0" y="0" width="600" height="200"/>
   */
-  console.log(x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255, width & 255, (width >> 8) & 255, height & 255, (height >> 8) & 255);
   const bufferToWrite = Buffer.from([
     x & 255,
     (x >> 8) & 255,
@@ -131,7 +137,6 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
     height & 255,
     (height >> 8) & 255]
   );
-  console.log(bufferToWrite);
   this.buffer.write(_.W);
   this.buffer.write(bufferToWrite);
   return this;
@@ -148,11 +153,11 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
   /*
     Example:
     <position x="250" y="0"/>
+
+    I run every time there's a  <text x=value/>
   */
-  console.log(x & 255, (x >> 8) & 255);
   const bufferToWrite = Buffer.from([x & 255, (x >> 8) & 255]);
-  console.log(bufferToWrite);
-  this.buffer.write(_.BACKSLASH)
+  this.buffer.write(_.BACKSLASH);
   this.buffer.write(bufferToWrite);
   return this;
 };

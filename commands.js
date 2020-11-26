@@ -40,7 +40,7 @@ var _ = {
   //GS $ Set absolute vertical print position in page mode
   //GS ＼ Set relative vertical print position in page mode
   
-  BACKSLASH: '\x1b\x5C',
+  BACKSLASH: '\x1b\x5c',
   
   LF: '\x0a',
   FS: '\x1c',
