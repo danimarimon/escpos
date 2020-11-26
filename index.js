@@ -120,17 +120,20 @@ Printer.prototype.setAreaPageMode = function (x, y, width, height) {
     Example:
     <area x="0" y="0" width="600" height="200"/>
   */
-
-  //ESC W xL xH yL yH dxL dxH dyL dyH
+  console.log(x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255, width & 255, (width >> 8) & 255, height & 255, (height >> 8) & 255);
+  const bufferToWrite = Buffer.from([
+    x & 255,
+    (x >> 8) & 255,
+    y & 255,
+    (y >> 8) & 255,
+    width & 255,
+    (width >> 8) & 255,
+    height & 255,
+    (height >> 8) & 255]
+  );
+  console.log(bufferToWrite);
   this.buffer.write(_.W);
-  this.buffer.writeUInt8(x);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(y);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(width >= 255 ? 255 : width);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(height >= 255 ? 255 : height);
-  this.buffer.writeUInt8(0);
+  this.buffer.write(bufferToWrite);
   return this;
 };
 
@@ -146,13 +149,11 @@ Printer.prototype.setPositionAreaMode = function (x, y) {
     Example:
     <position x="250" y="0"/>
   */
-
-  this.buffer.write(_.BACKSLASH);
-  this.buffer.writeUInt8(x >= 255 ? 255 : x);
-  this.buffer.write(_.ESC);
-  this.buffer.write(_.GS);
-  this.buffer.write(_.$);
-  this.buffer.writeUInt16BE(y >= 255 ? 255 : y);
+  console.log(x & 255, (x >> 8) & 255);
+  const bufferToWrite = Buffer.from([x & 255, (x >> 8) & 255]);
+  console.log(bufferToWrite);
+  this.buffer.write(_.BACKSLASH)
+  this.buffer.write(bufferToWrite);
   return this;
 };
 
