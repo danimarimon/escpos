@@ -955,6 +955,32 @@ Printer.prototype.image = async function (image, density) {
   return this.lineSpace();
 };
 
+Printer.prototype.imageBitmap = async function (base64) {
+  let result = Buffer.from(base64, 'base64');
+  density = 'd24';
+  var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
+  var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
+  let bitmap =  {
+    data: result,
+    density: n * 8
+  };
+  var self = this;
+
+  // added a delay so the printer can process the graphical data
+  // when connected via slower connection ( e.g.: Serial)
+  this.lineSpace(0); // set line spacing to 0
+  bitmap.data.forEach(async (line) => {
+    self.buffer.write(header);
+    self.buffer.writeUInt16LE(line.length / n);
+    self.buffer.write(line);
+    self.buffer.write(_.EOL);
+    await new Promise((resolve, reject) => {
+      setTimeout(() => { resolve(true) }, 200);
+    });
+  });
+  return this.lineSpace();
+};
+
 /**
  * [raster description]
  * @param  {[type]} image [description]
