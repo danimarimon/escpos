@@ -87,14 +87,11 @@ Printer.prototype.enablePageMode = function () {
 
 //TODO: finish method
 Printer.prototype.pageModePrintDirection = function (value) {
-  let dirInt = value;
-  if(value && (typeof value) === 'string') {
-    /**
-     * switch di valori
-     */
+  if(typeof value !== 'number') {
+    return this;
   }
   this.buffer.write(_.T);
-  this.buffer.writeUInt8(0);
+  this.buffer.writeUInt8(value);
   return this;
 };
 
@@ -791,6 +788,14 @@ Printer.prototype.qrcode = function (code, version, level, size) {
   return this;
 };
 
+/**
+ * 
+ * @param {*} content 
+ * @param {*} options 
+ * @param {*} callback 
+ * 
+ * Not finished yet
+ */
 Printer.prototype.qrimageFromBase64 = function (content, options, callback) {
   var self = this;
   if (typeof options == 'function') {
