@@ -996,7 +996,7 @@ Printer.prototype.image = async function (image, density) {
 
 Printer.prototype.imageBitmap = async function (base64, width, height) {
   let buffer = Buffer.from(base64, 'base64');
-  density = 'd24';
+  let density = 'd24';
   var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
   var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
   const data = [];
