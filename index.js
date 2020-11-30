@@ -893,6 +893,45 @@ function getRaster (data, width, height){
   };
 }
 
+function getMipmap(data, density, width, height) {
+  density = density || 24;
+
+  var ld, result = [];
+  var x, y, b, l, i;
+  var c = density / 8;
+
+  // n blocks of lines
+  var n = Math.ceil(height / density);
+
+  for (y = 0; y < n; y++) {
+    // line data
+    ld = result[y] = [];
+
+    for (x = 0; x < width; x++) {
+
+      for (b = 0; b < density; b++) {
+        i = x * c + (b >> 3);
+
+        if (ld[i] === undefined) {
+          ld[i] = 0;
+        }
+
+        l = y * density + b;
+        if (l < height) {
+          if (data[l * width + x]) {
+            ld[i] += (0x80 >> (b & 0x7));
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    data: result,
+    density: density
+  };
+}
+
 /**
  * @param  {[type]} base64   [description]
  * @param  {[type]} width [description]
@@ -955,15 +994,16 @@ Printer.prototype.image = async function (image, density) {
   return this.lineSpace();
 };
 
-Printer.prototype.imageBitmap = async function (base64) {
-  let result = Buffer.from(base64, 'base64');
+Printer.prototype.imageBitmap = async function (base64, width, height) {
+  let buffer = Buffer.from(base64, 'base64');
   density = 'd24';
   var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
   var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
-  let bitmap =  {
-    data: result,
-    density: n * 8
-  };
+  const data = [];
+  for (let hex of readBuffer(buffer)) {
+    data.push(hex);
+  }
+  const bitmap =  getMipmap(data, n, 79, 75);
   var self = this;
 
   // added a delay so the printer can process the graphical data
