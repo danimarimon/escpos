@@ -996,14 +996,11 @@ Printer.prototype.image = async function (image, density) {
 
 Printer.prototype.imageBitmap = async function (base64, width, height) {
   let buffer = Buffer.from(base64, 'base64');
+  const image = Image.load(buffer, 'image/png');
   let density = 'd24';
   var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
   var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
-  const data = [];
-  for (let hex of readBuffer(buffer)) {
-    data.push(hex);
-  }
-  const bitmap =  getMipmap(data, n, 79, 75);
+  const bitmap = image.toBitmap();
   var self = this;
 
   // added a delay so the printer can process the graphical data
