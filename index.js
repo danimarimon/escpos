@@ -10,6 +10,7 @@ const utils = require('./utils');
 const _ = require('./commands');
 const Promiseify = require('./promisify');
 const statuses = require('./statuses');
+const { GS } = require('./commands');
 const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
 /**
@@ -637,6 +638,17 @@ Printer.prototype.lineSpace = function (n) {
     this.buffer.writeUInt8(n);
   }
   return this;
+};
+
+Printer.prototype.smooth = function (isEnabled) {
+  /**
+   * 
+    ASCII GS B n
+    Hex 1D 42 n
+   */
+  this.buffer.write(_.GS);
+  this.buffer.write('\x42');
+  this.buffer.writeUInt8(isEnabled ? 1 : 0);
 };
 
 /**
