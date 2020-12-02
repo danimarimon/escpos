@@ -851,18 +851,18 @@ Printer.prototype.qrcodeCustom = function (code, version, level, size) {
     this.buffer.write(dataRaw);
 
     // Print from buffer
+    console.log('Stampa');
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
-    console.log('Fine stampa');
-  } catch(e) {
-    console.log(e);
-  } finally {
     console.log('Pulizia buffer');
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
     this.buffer.write('');
+  } catch(e) {
+    console.log(e);
+  } finally {
 
     return this; 
   }
