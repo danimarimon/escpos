@@ -788,6 +788,66 @@ Printer.prototype.qrcode = function (code, version, level, size) {
   return this;
 };
 
+Printer.prototype.qrcodeCustom = function (code, version, level, size) {
+  const dataRaw = iconv.encode(code, 'utf8');
+    if (dataRaw.length < 1 && dataRaw.length > 2710) {
+      throw new Error('Invalid code length in byte. Must be between 1 and 2710');
+    }
+
+    // Set pixel size
+    if (!size || (size && typeof size !== 'number'))
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
+    else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
+    else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
+    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
+    //GS ( k pL pH cn fn n (fn=67)
+    this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x43');
+    this.buffer.writeUInt8(size);x
+
+    // Set version
+    // Set model
+    /*
+    if (!version || (version && typeof version !== 'number'))
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
+    else if (version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
+    else if (version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
+    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
+    */
+
+    //GS ( k pL pH cn fn n1 n2 (fn=65)
+    this.buffer.write('\x1d\x28\x6b\x04\x00\x31\x41');
+    this.buffer.writeUInt8(version === 1 ? 49 : version === 2 ? 50 : 49);
+
+    // Set level
+    /*
+    if (!level || (level && typeof level !== 'string'))
+      level = _.CODE2D_FORMAT.QR_LEVEL_L;
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
+    */
+    //GS ( k pL pH cn fn n (fn=69)
+    this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x45');
+    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
+    this.buffer.writeUInt8(49);
+
+    // Transfer data(code) to buffer
+    //GS ( k pL pH cn fn m d1…dk (fn=80)
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
+    this.buffer.write(dataRaw);
+
+    // Print from buffer
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1 + '\x03\x00');
+    //this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
+  return this;
+};
+
+
 /**
  * 
  * @param {*} content 
