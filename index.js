@@ -237,6 +237,14 @@ Printer.prototype.newLine = function () {
   return this.print(_.EOL);
 };
 
+Printer.prototype.horizontalTab = function () {
+  return this.print('\x09');
+};
+
+Printer.prototype.carriageReturn = function () {
+  return this.print('\x0A');
+};
+
 /**
  * [function Print encoded alpha-numeric text with End Of Line]
  * @param  {[String]}  content  [mandatory]
