@@ -237,6 +237,12 @@ _.MODEL = {
   },
 };
 
+_.QR_CODE_CUSTOM = {
+  MODEL_CMD: '\x1d\x28\x6b\x04\x00\x31\x41',
+  SIZE_CMD: '\x1d\x28\x6b\x03\x00\x31\x43',
+  LEVEL_CMD: '\x1d\x28\x6b\x03\x00\x31\x45',
+}
+
 /**
  * [BARCODE_FORMAT Barcode format]
  * @type {Object}

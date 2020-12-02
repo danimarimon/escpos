@@ -808,7 +808,8 @@ Printer.prototype.qrcodeCustom = function (code, version, level, size) {
     // Set model
     //GS ( k pL pH cn fn n1 n2 (fn=65)
     //console.log('stampo version:', version === 1 ? 49 : version === 2 ? 50 : 49);
-    this.buffer.write('\x1d\x28\x6b\x04\x00\x31\x41');
+    //this.buffer.write('\x1d\x28\x6b\x04\x00\x31\x41');
+    this.buffer.write(_.QR_CODE_CUSTOM.MODEL_CMD);
     this.buffer.writeUInt8(version === 1 ? 49 : version === 2 ? 50 : 49);
     this.buffer.writeUInt8(0);
 
@@ -821,7 +822,8 @@ Printer.prototype.qrcodeCustom = function (code, version, level, size) {
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
     else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
-    this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x43');
+    //this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x43');
+    this.buffer.write(_.QR_CODE_CUSTOM.SIZE_CMD);
     this.buffer.writeUInt8(size);
 
    
@@ -829,7 +831,8 @@ Printer.prototype.qrcodeCustom = function (code, version, level, size) {
     // Set level
     //GS ( k pL pH cn fn n (fn=69)
     //console.log('stampo level:', 49);
-    this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x45');
+    //this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x45');
+    this.buffer.write(_.QR_CODE_CUSTOM.LEVEL_CMD);
     this.buffer.writeUInt8(49);
 
     // Transfer data(code) to buffer
