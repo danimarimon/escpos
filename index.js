@@ -790,57 +790,38 @@ Printer.prototype.qrcode = function (code, version, level, size) {
 
 Printer.prototype.qrcodeCustom = function (code, version, level, size) {
   try {
-    console.log('Inizio stampa');
     const dataRaw = iconv.encode(code, 'utf8');
     if (dataRaw.length < 1 && dataRaw.length > 2710) {
       throw new Error('Invalid code length in byte. Must be between 1 and 2710');
     }
 
-    console.log('stampo dataRaw:', dataRaw);
 
-     // Set version
+    // Set version
     // Set model
-    /*
-    if (!version || (version && typeof version !== 'number'))
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
-    else if (version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
-    else if (version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
-    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
-    */
-
     //GS ( k pL pH cn fn n1 n2 (fn=65)
-    console.log('stampo version:', version === 1 ? 49 : version === 2 ? 50 : 49);
+    //console.log('stampo version:', version === 1 ? 49 : version === 2 ? 50 : 49);
     this.buffer.write('\x1d\x28\x6b\x04\x00\x31\x41');
     this.buffer.writeUInt8(version === 1 ? 49 : version === 2 ? 50 : 49);
     this.buffer.writeUInt8(0);
 
     // Set pixel size
+    //GS ( k pL pH cn fn n (fn=67)
+    //console.log('stampo size:', size);
     if (!size || (size && typeof size !== 'number'))
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
     else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
     else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
-    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
-    //GS ( k pL pH cn fn n (fn=67)
-    console.log('stampo size:', size);
     this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x43');
     this.buffer.writeUInt8(size);
 
    
 
     // Set level
-    /*
-    if (!level || (level && typeof level !== 'string'))
-      level = _.CODE2D_FORMAT.QR_LEVEL_L;
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
-    */
     //GS ( k pL pH cn fn n (fn=69)
-    console.log('stampo level:', 49);
+    //console.log('stampo level:', 49);
     this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x45');
-    //this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
     this.buffer.writeUInt8(49);
 
     // Transfer data(code) to buffer
@@ -851,11 +832,12 @@ Printer.prototype.qrcodeCustom = function (code, version, level, size) {
     this.buffer.write(dataRaw);
 
     // Print from buffer
-    console.log('Stampa');
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
-    console.log('Pulizia buffer');
+    
+    //Flush buffer
+    //console.debug('Pulizia buffer');
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
