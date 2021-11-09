@@ -20,9 +20,10 @@ var numToHexString = function (value) {
  * ESC/POS _ (Constants)
  */
 var _ = {
-  L: '\x1b\x4c', //Switches from standard mode to page mode
-  S: '\x1b\x53', //Switches from page mode to standard mode
+  L: '\x4c', //Switches from standard mode to page mode
+  S: '\x53', //Switches from page mode to standard mode
 
+  $: '\x24',
   /**
    * ESC T n -> Select print direction in page mode
    * 
@@ -39,11 +40,11 @@ var _ = {
   //GS $ Set absolute vertical print position in page mode
   //GS ＼ Set relative vertical print position in page mode
   
-  BACKSLASH: '\x1b\x92',
+  BACKSLASH: '\x1b\x5c',
   
   LF: '\x0a',
   FS: '\x1c',
-  FF: '\x1b\x0c', //print in page mode and return to standard
+  FF: '\x0c', //print in page mode and return to standard
   GS: '\x1d',
   DLE: '\x10',
   EOT: '\x04',
@@ -236,6 +237,12 @@ _.MODEL = {
   },
 };
 
+_.QR_CODE_CUSTOM = {
+  MODEL_CMD: '\x1d\x28\x6b\x04\x00\x31\x41',
+  SIZE_CMD: '\x1d\x28\x6b\x03\x00\x31\x43',
+  LEVEL_CMD: '\x1d\x28\x6b\x03\x00\x31\x45',
+}
+
 /**
  * [BARCODE_FORMAT Barcode format]
  * @type {Object}
@@ -330,7 +337,7 @@ _.CODETABLE = {
   SET: '\x74',
   CODES:{
     PC437:'\x00', //PC437
-    PC858:'\x13', //WPC1252
+    PC858:'\x13', //PC858
     LATIN1:'\x10', //WPC1252
     LATIN2:'\x12', //PC852 (Latin2)
   }

@@ -10,6 +10,7 @@ const utils = require('./utils');
 const _ = require('./commands');
 const Promiseify = require('./promisify');
 const statuses = require('./statuses');
+const { GS } = require('./commands');
 const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
 /**
@@ -76,74 +77,105 @@ Printer.prototype.setCharacterCodeTable = function (codeTable) {
 };
 
 /**
- * TODO: try from here
+ * Page Mode methods
  */
 
- /**
-  * 
-  */
 Printer.prototype.enablePageMode = function () {
+  this.buffer.write(_.ESC);
   this.buffer.write(_.L);
   return this;
 };
 
-/**
- * 
- */
+//TODO: finish method
+Printer.prototype.pageModePrintDirection = function (value) {
+  if(typeof value !== 'number') {
+    return this;
+  }
+  this.buffer.write(_.T);
+  this.buffer.writeUInt8(value);
+  return this;
+};
+
 Printer.prototype.disablePageMode = function () {
+  this.buffer.write(_.ESC);
   this.buffer.write(_.S);
   return this;
 };
 
+Printer.prototype.printDataInPageMode = function () {
+  this.buffer.write(_.ESC);
+  this.buffer.write(_.FF);
+  return this;
+}
+
+Printer.prototype.printDataInPageModeAndExit = function () {
+  this.buffer.write(_.FF);
+  return this;
+}
+
+Printer.prototype.setAbsolutePrintPosition = function (x, y) {
+  //ESC $ -> X absolute
+  //GS \ -> Y relative
+  const xBuf = Buffer.from([x & 255, (x >> 8) & 255]);
+  const yBuf = Buffer.from([y & 255, (y >> 8) & 255]);
+
+  this.buffer.write(_.GS);
+  this.buffer.write(_.$);
+  this.buffer.write(xBuf);
+  this.buffer.write(_.GS);
+  this.buffer.write(_.$);
+  this.buffer.write(yBuf);
+}
+
 /**
  * 
- * @param {*} x 
- * @param {*} y 
- * @param {*} width 
- * @param {*} height 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} width 
+ * @param {number} height 
  */
 Printer.prototype.setAreaPageMode = function (x, y, width, height) {
   /*
     Example:
     <area x="0" y="0" width="600" height="200"/>
   */
+  const bufferToWrite = Buffer.from([
+    x & 255,
+    (x >> 8) & 255,
+    y & 255,
+    (y >> 8) & 255,
+    width & 255,
+    (width >> 8) & 255,
+    height & 255,
+    (height >> 8) & 255]
+  );
   this.buffer.write(_.W);
-  this.buffer.writeUInt8(x);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(y);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(width);
-  this.buffer.writeUInt8(0);
-  this.buffer.writeUInt8(height);
-  this.buffer.writeUInt8(0);
+  this.buffer.write(bufferToWrite);
   return this;
 };
 
 /**
  * 
- * @param {*} x 
- * @param {*} y 
+ * @param {number} x 
+ * @param {number} y
  * 
  * Relative position
  */
-Printer.prototype.setPositionAreaMode = function (x, y) {
+Printer.prototype.setPositionAreaMode = function (x, y = 0) {
   /*
     Example:
     <position x="250" y="0"/>
+
+    I run every time there's a  <text x=value/>
   */
+  const bufferToWrite = Buffer.from([x & 255, (x >> 8) & 255]);
   this.buffer.write(_.BACKSLASH);
-  this.buffer.writeUInt8(x ? x : 0);
-  this.buffer.writeUInt8(y ? y : 0);
+  this.buffer.write(bufferToWrite);
   return this;
 };
 
-Printer.prototype.printDataInPageMode = function () {
-  this.buffer.write(_.FF);
-  return this;
-}
-
 /**
- * TODO: try to here
+ * Page Mode methods finished
  */
 
 /**
@@ -204,6 +236,14 @@ Printer.prototype.println = function (content) {
  */
 Printer.prototype.newLine = function () {
   return this.print(_.EOL);
+};
+
+Printer.prototype.horizontalTab = function () {
+  return this.print('\x09');
+};
+
+Printer.prototype.carriageReturn = function () {
+  return this.print('\x0A');
 };
 
 /**
@@ -600,6 +640,17 @@ Printer.prototype.lineSpace = function (n) {
   return this;
 };
 
+Printer.prototype.smooth = function (isEnabled) {
+  /**
+   * 
+    ASCII GS B n
+    Hex 1D 42 n
+   */
+  this.buffer.write(_.GS);
+  this.buffer.write('\x42');
+  this.buffer.writeUInt8(isEnabled ? 1 : 0);
+};
+
 /**
  * [hardware]
  * @param  {[type]}    hw       [description]
@@ -757,6 +808,80 @@ Printer.prototype.qrcode = function (code, version, level, size) {
   return this;
 };
 
+Printer.prototype.qrcodeCustom = function (code, version, level, size) {
+  try {
+    const dataRaw = iconv.encode(code, 'utf8');
+    if (dataRaw.length < 1 && dataRaw.length > 2710) {
+      throw new Error('Invalid code length in byte. Must be between 1 and 2710');
+    }
+
+
+    // Set version
+    // Set model
+    //GS ( k pL pH cn fn n1 n2 (fn=65)
+    //console.log('stampo version:', version === 1 ? 49 : version === 2 ? 50 : 49);
+    //this.buffer.write('\x1d\x28\x6b\x04\x00\x31\x41');
+    this.buffer.write(_.QR_CODE_CUSTOM.MODEL_CMD);
+    this.buffer.writeUInt8(version === 1 ? 49 : version === 2 ? 50 : 49);
+    this.buffer.writeUInt8(0);
+
+    // Set pixel size
+    //GS ( k pL pH cn fn n (fn=67)
+    //console.log('stampo size:', size);
+    if (!size || (size && typeof size !== 'number'))
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
+    else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
+    else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
+    //this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x43');
+    this.buffer.write(_.QR_CODE_CUSTOM.SIZE_CMD);
+    this.buffer.writeUInt8(size);
+
+   
+
+    // Set level
+    //GS ( k pL pH cn fn n (fn=69)
+    //console.log('stampo level:', 49);
+    //this.buffer.write('\x1d\x28\x6b\x03\x00\x31\x45');
+    this.buffer.write(_.QR_CODE_CUSTOM.LEVEL_CMD);
+    this.buffer.writeUInt8(49);
+
+    // Transfer data(code) to buffer
+    //GS ( k pL pH cn fn m d1…dk (fn=80)
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
+    this.buffer.write(dataRaw);
+
+    // Print from buffer
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
+    
+    //Flush buffer
+    //console.debug('Pulizia buffer');
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
+    this.buffer.write('');
+  } catch(e) {
+    console.log(e);
+  } finally {
+
+    return this; 
+  }
+};
+
+
+/**
+ * 
+ * @param {*} content 
+ * @param {*} options 
+ * @param {*} callback 
+ * 
+ * Not finished yet
+ */
 Printer.prototype.qrimageFromBase64 = function (content, options, callback) {
   var self = this;
   if (typeof options == 'function') {
@@ -854,6 +979,45 @@ function getRaster (data, width, height){
   };
 }
 
+function getMipmap(data, density, width, height) {
+  density = density || 24;
+
+  var ld, result = [];
+  var x, y, b, l, i;
+  var c = density / 8;
+
+  // n blocks of lines
+  var n = Math.ceil(height / density);
+
+  for (y = 0; y < n; y++) {
+    // line data
+    ld = result[y] = [];
+
+    for (x = 0; x < width; x++) {
+
+      for (b = 0; b < density; b++) {
+        i = x * c + (b >> 3);
+
+        if (ld[i] === undefined) {
+          ld[i] = 0;
+        }
+
+        l = y * density + b;
+        if (l < height) {
+          if (data[l * width + x]) {
+            ld[i] += (0x80 >> (b & 0x7));
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    data: result,
+    density: density
+  };
+}
+
 /**
  * @param  {[type]} base64   [description]
  * @param  {[type]} width [description]
@@ -914,6 +1078,33 @@ Printer.prototype.image = async function (image, density) {
     });
   });
   return this.lineSpace();
+};
+
+/**
+ * @deprecated
+ * @param {*} base64 
+ * @param {*} width 
+ * @param {*} height 
+ */
+Printer.prototype.imageBitmap = async function (base64, width, height) {
+  let buffer = Buffer.from(base64, 'base64');
+  const hexArray = [];
+  for (let hex of readBuffer(buffer)) {
+    hexArray.push(hex);
+  }
+
+  const bitArray = hexArray.map((hex) => {
+    return hex.toString(2);
+  });
+
+  console.log(bitArray);
+
+  this.buffer.write(_.BITMAP_FORMAT['BITMAP_D24']);
+  this.buffer.writeUInt8(width);
+  this.buffer.writeUInt8(height);
+  this.buffer.write(bitArray);
+
+  return this;
 };
 
 /**
